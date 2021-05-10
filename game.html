@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Tap Royale - Addicting new style game of battle royale!</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="./assets/css/game-client.css">
+    <script src='https://cdn.firebase.com/js/client/2.4.0/firebase.js'></script>
+</head>
+
+<body>
+    <div id="aber-game-parent-wrap">
+        <div id="login-port">
+            <div class="aber-logo-wrap">
+                <img src="./assets/Tap-Royale.png" class="logoHeight">
+                <!-- <h2 class="aber-sub-text">Tap Royale (beta)</h2> -->
+            </div>
+            <form class="aber-login-form" action="javascript:accreq(1)">
+                <div class="aber-form-elem-wrap">
+                    <span class="form-input-label">Name: </span>
+                    <input id="usernamepre" type="text">
+                </div>
+                <div class="aber-form-elem-wrap">
+                    <span class="form-input-label">Password: </span>
+                    <input id="passwordpre" type="password">
+                </div>
+                <div class="aber-form-elem-wrap">
+                    <input type="submit" value="Login">
+                    <input type="button" id="crrAccBtn" value="Create Account">
+                </div>
+            </form><br>
+            <div class="aber-center-ali aber-eight-center">
+                <span>Only accounts registered for beta may login.<br>β登録期間中に作成されたアカウントのみ<br>ログインできます</span>
+            </div>
+        </div>
+        <div id="lobby-port">
+            <!--player status labels-->
+
+            <!--skin-->
+            <img id="lobby-uskin" src="./assets/player_skin/pbase_down.png">
+            <!--clothes-->
+            <img id="lobby-clothes" src="./assets/player_skin/pclothes_down.png">
+            <!--hair-->
+            <div id="lobby-hair"></div>
+            <div class="lobby-bottom-tab">
+                <h3 id="uplayer-username">username</h3>
+                <div id="lobby-idle-btns">
+                    <button class="lobby-bottom-btn" id="ready-trig-btn">PLAY</button>
+                    <!-- <button class="lobby-bottom-btn" id="status-shou-btn" disabled>STATUS</button> -->
+                </div>
+                <div id="lobby-active-btns">
+                    <button class="lobby-bottom-btn" id="cancel-trig-btn">CANCEL</button>
+                </div>
+            </div>
+        </div>
+        <div id="game-port">
+            <canvas id="aberoyale-window"></canvas>
+            <div id="game-dom-elements">
+                <button id="leave-arena-btn">leave arena (1s)</button>
+                <div class="client-life-bar-wrap">
+                    <div id="client-life-bar"></div>
+                </div>
+                <button class="item-use-slot"></button>
+                <button class="item-use-slot"></button>
+                <button class="item-use-slot"></button>
+                <button class="item-use-slot"></button>
+            </div>
+        </div>
+        <!-- <img src="./assets/terrain/castle_wall.png"> -->
+    </div>
+
+    <div class=" systemloaderwrap">
+        <!--in game player sprites-->
+        <!--player pbase-->
+        <img id="uplayer-pbase">
+
+        <!--player clothes-->
+        <!--plauer armor-->
+
+        <!--in game item sprites-->
+
+        <!--other player pbase-->
+        <img id="oplayer-pbase" src="">
+
+        <!--other player clothes-->
+        <img id="oplayer-clothe" src="">
+
+        <!--other player armor-->
+        <img id="oplayer-armor" src="">
+    </div>
+
+    <script src="./script/game.js"></script>
+</body>
+
+
+</html>

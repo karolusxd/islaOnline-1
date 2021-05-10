@@ -1,0 +1,185 @@
+body {
+    margin: 0;
+}
+
+canvas {
+    background: #000;
+}
+
+#login-port {
+    background: #3d3429;
+    width: 100%;
+    height: 337.5px;
+    z-index: 20;
+    color: #fff;
+}
+
+#lobby-port {
+    background: #1d4913;
+    width: 100%;
+    height: 337.5px;
+    z-index: 20;
+    color: #fff;
+}
+
+#aber-game-parent-wrap {
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#aberoyale-window {
+    background: #000;
+    width: 377.5px;
+    height: 600px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+}
+
+.logoHeight {
+    height: 50px;
+}
+
+.aber-logo-wrap {
+    padding: 20px 0px 20px 0px;
+    text-align: center;
+}
+
+.aber-sub-text {
+    color: #fff;
+    margin-top: 0px;
+}
+
+
+
+.form-input-label {
+    color: #fff;
+    font-size: 20px;
+    min-width: 100px;
+    display: inline-block;
+}
+
+.aber-login-form {
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    width: 285px;
+}
+
+.aber-center-ali {
+    text-align: center;
+}
+
+.aber-center-ali {
+    width: 90%;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.aber-form-elem-wrap {
+    margin-bottom: 5px;
+}
+
+.systemloaderwrap {
+    display: none;
+}
+
+img {
+    image-rendering: pixelated;
+}
+
+#lobby-uskin {
+    position: absolute;
+    top: 150px;
+    height: 190px;
+    left: 150px;
+    filter: brightness(1);
+}
+#lobby-clothes {
+    position: absolute;
+    top: 198px;
+    height: 130px;
+    left: 162px;
+    filter: brightness(0.6) hue-rotate(0deg);
+}
+
+#lobby-hair {
+    position: absolute;
+    top: 150px;
+    left: 174px;
+    height: 15px;
+    width: 38px;
+    background: rgb(110 63 0 / 99%);
+    filter: brightness(1);
+}
+
+.lobby-bottom-tab {
+    position: absolute;
+    top: 400px;
+    width: 377.5px;
+    text-align: center;
+}
+
+.lobby-bottom-btn {
+    font-size: 30px;
+
+}
+
+img {
+    user-drag: none; 
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+#lobby-active-btns {
+    display: none;
+}
+
+.item-use-slot {
+    width: 70px;
+    height: 70px;
+    border: 10px ridge tan;
+    background: rgba(0,0,0,0.5);
+}
+
+#game-dom-elements {
+    position: absolute;
+    top: 515px;
+    left: 43px;
+    z-index: 200;
+}
+
+.client-life-bar-wrap {
+    position: absolute;
+    top: -40px;
+    height: 20px;
+    width: 290px;
+    background: #5f5f5f;
+    border: 1px solid #ebebeb;
+}
+
+#client-life-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 20px;
+    background: #ff6462;
+    border-right: 1px solid #ebebeb;
+}
+
+#game-port, #lobby-port {
+    display: none;
+}
+
+#leave-arena-btn {
+    position: absolute;
+    top: -500px;
+    right: -30px;
+    font-size: 20px;
+    padding: 10px 10px 10px 10px;
+}

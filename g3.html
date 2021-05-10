@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no">
+	<link rel="stylesheet" href="./assets/css/g3dom.css">
+	<style>
+		body {
+			background-color: #ffffff;
+			margin: 0;
+			overflow: hidden;
+		}
+	</style>
+</head>
+
+<body>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/94/three.min.js"></script>
+	<script>
+
+		var camera, scene, renderer;
+		var groundg, groundm, ground;
+
+		//player part geometry
+		var headg, neckg, bodyg, armg, handg, thighg, legg;
+
+		//most important global variables here
+		var gamemode = true; //when testing, set this to "true"
+
+		function init() {
+
+			camera = new THREE.PerspectiveCamera(85, (window.innerWidth / 50) / (window.innerHeight / 50), 0.01, 100);
+			camera.position.z = 10;
+			camera.position.y = 8;
+			camera.rotation.x = -1 * (Math.PI / 5)
+
+			groundg = new THREE.PlaneGeometry(10, 10);
+			groundm = new THREE.MeshBasicMaterial({ color: 0x5f4e3d, side: THREE.DoubleSide });
+
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color(0x000000);
+
+			ground = new THREE.Mesh(groundg, groundm);
+			scene.add(ground);
+			ground.rotation.x = Math.PI / 2;
+
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.setPixelRatio(window.devicePixelRatio / 10);
+			document.body.appendChild(renderer.domElement);
+
+		}
+
+		function animate(time) {
+
+			// ground.rotation.y = time*0.01;
+			// ground.rotation.x = time*0.001;
+
+			if (gamemode) {
+				renderer.render(scene, camera);
+				requestAnimationFrame(animate);
+			}
+		}
+
+		init();
+		requestAnimationFrame(animate);
+
+
+		//server side scripts here
+		var accountinfo = {
+			//stuff
+		}
+
+            // click/tap functions below
+
+
+	</script>
+</body>
+
+</html>
