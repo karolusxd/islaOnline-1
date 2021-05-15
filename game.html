@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Tap Royale - Addicting new style game of battle royale!</title>
+    <title>Aberoth Royale - Addicting new style game of battle royale!</title>
     <meta name="viewport" content="width=device-width, user-scalable=no">
     <meta charset="utf-8">
     <link rel="stylesheet" href="./assets/css/game-client.css">
@@ -61,10 +61,16 @@
                 <div class="client-life-bar-wrap">
                     <div id="client-life-bar"></div>
                 </div>
-                <button class="item-use-slot"></button>
-                <button class="item-use-slot"></button>
-                <button class="item-use-slot"></button>
-                <button class="item-use-slot"></button>
+                <button class="item-use-slot" it="-1" id="itemS-1"></button>
+                <button class="item-use-slot" it="-1" id="itemS-2"></button>
+                <button class="item-use-slot" it="-1" id="itemS-3"></button>
+                <button class="item-use-slot" it="-1" id="itemS-4"></button>
+
+                <!--run cooldown-->
+                <div class="runCoolDownWrap">
+                    <div id="runCoolDownBar"></div>
+                    <img class="runIcon" src="./assets/system/running.png">
+                </div>
             </div>
         </div>
         <!-- <img src="./assets/terrain/castle_wall.png"> -->
