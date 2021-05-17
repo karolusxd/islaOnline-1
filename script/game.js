@@ -679,6 +679,7 @@ gameclient.addEventListener("click", function (e) {
             actionConf = false;
             //change focused player
             //send punches
+            playPunchAudio()
             db.push({ type: "punch-player", attacker: lgusr, recieve: accountinfo.name[i] });
         }
     }
@@ -746,13 +747,12 @@ document.getElementById("itemS-4").onclick = function () {
 
 function updateSlots() {
     //clear all inventory
-    for (i = 0; i < itemslot.length; i++) {
-        document.getElementById("itemS-" + (i + 1)).style.backgroundImage = './assets/consume/noConsume.png';
+    for (i = 0; i < 4; i++) {
+        document.getElementById("itemS-" + (i + 1)).style.backgroundImage = 'url("./assets/consume/noConsume.png")';
     }
 
     if (itemslot.length != 0) {
         for (i = 0; i < itemslot.length; i++) {
-            console.log(itemslot);
             if (itemslot[i].split("!")[0] == "s") {
                 //scrolls
                 document.getElementById("itemS-" + (i + 1)).style.backgroundImage = 'url("./assets/consume/scroll_t' + itemslot[i].split("!")[1] + '_inventory.png")';
