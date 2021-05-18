@@ -481,6 +481,10 @@ function animate() {
     var healthPerc = ((accountinfo.health[lgusrIndex] / (accountinfo.level[lgusrIndex] * 50)) * 100);
     document.getElementById("client-life-bar").style.width = healthPerc + "%";
 
+    if (leaveMode == false) {
+        document.getElementById("leave-arena-btn").innerHTML = "leave arena (" + accountinfo.level[lgusrIndex] + "s)";
+    }
+
     if (accountinfo.health[lgusrIndex] == 0) {
         deadParam = true;
         gamemode = false;
