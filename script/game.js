@@ -914,7 +914,7 @@ gameclient.addEventListener("click", function (e) {
         var pymin = accountinfo.positiony[i] - camera[1] + 25;
         var pymax = accountinfo.positiony[i] - camera[1] + 100;
         var ishere = accountinfo.place[i];
-        if (pxmin <= mouseX && mouseX <= pxmax && pymin <= mouseY && mouseY <= pymax && i != lgusrIndex) {
+        if (pxmin <= mouseX && mouseX <= pxmax && pymin <= mouseY && mouseY <= pymax && i != lgusrIndex && accountinfo.place[i] != 0) {
             //playr is clicked
             console.log("clicking on player");
             actionConf = false;
