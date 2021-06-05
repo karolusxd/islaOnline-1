@@ -195,7 +195,7 @@ img {
     width: 290px;
     background: #030608;
     border: 1px solid #ebebeb;
-    pointer-events: none;
+    /* pointer-events: none; */
 }
 
 #client-life-bar {
@@ -206,7 +206,7 @@ img {
     height: 10px;
     background: #ff3e41;
     border-right: 1px solid #ebebeb;
-    pointer-events: none;
+    /* pointer-events: none; */
 }
 
 .client-mp-bar-wrap {
