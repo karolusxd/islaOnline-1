@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Aberoth Royale - Addicting new style game of battle royale!</title>
+    <title>Lawless</title>
     <meta name="viewport" content="width=device-width, user-scalable=no">
     <meta charset="utf-8">
     <link rel="stylesheet" href="./assets/css/game-client.css">
@@ -13,59 +13,94 @@
     <div id="aber-game-parent-wrap">
         <div id="login-port">
             <div class="aber-logo-wrap">
-                <h3>Aberoth Royale（仮）</h3>
-                <span>beta test ver</span><br>
+                <h3>Lawless</h3>
+                <span>バージョン：β0.1</span><br>
                 <!-- <h2 class="aber-sub-text">Tap Royale (beta)</h2> -->
             </div>
             <form class="aber-login-form" action="javascript:accreq(1)">
                 <div class="aber-form-elem-wrap">
-                    <span class="form-input-label">Name: </span>
+                    <span class="form-input-label">プレイヤー名: </span>
                     <input id="usernamepre" type="text">
                 </div>
                 <div class="aber-form-elem-wrap">
-                    <span class="form-input-label">Password: </span>
+                    <span class="form-input-label">パスワード: </span>
                     <input id="passwordpre" type="password">
                 </div>
                 <div class="aber-form-elem-wrap">
-                    <input type="submit" value="Login">
-                    <input type="button" id="crrAccBtn" value="Create Account">
+                    <input type="submit" value="ログイン">
+                    <input type="button" id="crrAccBtn" value="アカウントを作成">
                 </div>
             </form><br>
             <div class="aber-center-ali aber-eight-center">
-                <span>Only accounts registered for beta may login.<br>β登録期間中に作成されたアカウントのみ<br>ログインできます</span>
+                <span>明日はクリエイターの誕生日です</span>
             </div>
         </div>
         <div id="lobby-port">
-            <!--player status labels-->
-
-            <!--skin-->
-            <img id="lobby-uskin" src="./assets/player_skin/pbase_down.png">
-            <!--clothes-->
-            <img id="lobby-clothes" src="./assets/player_skin/pclothes_down.png">
-            <!--hair-->
-            <div id="lobby-hair"></div>
-            <div class="lobby-bottom-tab">
-                <h3 id="uplayer-username">username</h3>
-                <div id="lobby-idle-btns">
-                    <button class="lobby-bottom-btn" id="ready-trig-btn">PLAY</button>
-                    <!-- <button class="lobby-bottom-btn" id="status-shou-btn" disabled>STATUS</button> -->
+            <div id="hometabport">
+                <!--player status labels-->
+                <div class="rank-banner"></div>
+                <div class="banner-design-one"></div>
+                <div class="banner-design-two"></div>
+                <div class="banner-design-three"></div>
+                <div class="banner-design-four"></div>
+                <div class="lobby-bottom-tab">
+                    <div id="lobby-idle-btns">
+                        <button class="lobby-bottom-btn" id="ready-trig-btn">PLAY</button>
+                        <!-- <button class="lobby-bottom-btn" id="status-shou-btn" disabled>STATUS</button> -->
+                    </div>
+                    <div id="lobby-active-btns">
+                        <button class="lobby-bottom-btn" id="cancel-trig-btn">CANCEL</button>
+                    </div>
                 </div>
-                <div id="lobby-active-btns">
-                    <button class="lobby-bottom-btn" id="cancel-trig-btn">CANCEL</button>
+            </div>
+            <div id="geartabport">comming soon...</div>
+            <div id="statstabport">
+                <div class="statsControlWrap">
+                    <h3>Player Level: <span id="playerLevelShou">1</span></h3>
+                    <span><span id="statPointShou">0</span> status point(s) available for use</span>
+                    <hr>
+                    <div>
+                        <span>Health: </span>
+                        <button id="minusHealthStat">-</button>
+                        <span id="health-levelstats">1</span>
+                        <button id="plusHealthStat">+</button>
+                    </div>
+                    <div>
+                        <span>Magic: </span>
+                        <button id="minusMagicStat">-</button>
+                        <span id="health-levelstats">1</span>
+                        <button id="plusMagicStat">+</button>
+                    </div>
+                    <div>
+                        <span>Speed: </span>
+                        <button id="minusSpeedStat">-</button>
+                        <span id="health-levelstats">1</span>
+                        <button id="plusSpeedStat">+</button>
+                    </div>
                 </div>
+            </div>
+            <div id="shoptabport">comming soon...</div>
+            <div class="lobby-tabs">
+                <button class="tab-btn" id="home-tab" disabled></button>
+                <button class="tab-btn" id="gear-tab"></button>
+                <button class="tab-btn" id="stats-tab"></button>
+                <button class="tab-btn" id="shop-tab"></button>
             </div>
         </div>
         <div id="game-port">
             <canvas id="aberoyale-window"></canvas>
             <div id="game-dom-elements">
-                <button id="leave-arena-btn">leave arena (1s)</button>
+                <button id="leave-arena-btn">leave arena (10s)</button>
                 <div class="client-life-bar-wrap">
                     <div id="client-life-bar"></div>
                 </div>
-                <button class="item-use-slot" id="itemS-1"></button>
-                <button class="item-use-slot" id="itemS-2"></button>
-                <button class="item-use-slot" id="itemS-3"></button>
-                <button class="item-use-slot" id="itemS-4"></button>
+                <div class="client-mp-bar-wrap">
+                    <div id="client-mp-bar"></div>
+                </div>
+                <button class="item-use-slot" id="itemS-1" onclick="csmTrg(0)"></button>
+                <button class="item-use-slot" id="itemS-2" onclick="csmTrg(1)"></button>
+                <button class="item-use-slot" id="itemS-3" onclick="csmTrg(2)"></button>
+                <button class="item-use-slot" id="itemS-4" onclick="csmTrg(3)"></button>
 
                 <!--run cooldown-->
                 <div class="runCoolDownWrap">

@@ -8,6 +8,74 @@ document.getElementById("crrAccBtn").addEventListener("click", async () => {
     accreq(0);
 });
 
+document.getElementById("home-tab").onclick = function () {
+    lobbyTabsS(0);
+}
+
+document.getElementById("gear-tab").onclick = function () {
+    lobbyTabsS(1);
+}
+
+document.getElementById("stats-tab").onclick = function () {
+    lobbyTabsS(2);
+}
+
+document.getElementById("shop-tab").onclick = function () {
+    lobbyTabsS(3);
+}
+
+function lobbyTabsS(mode) {
+    if (mode == 0) {
+        // home tab
+        document.getElementById("hometabport").style.display = "block";
+        document.getElementById("geartabport").style.display = "none";
+        document.getElementById("statstabport").style.display = "none";
+        document.getElementById("shoptabport").style.display = "none";
+
+        //button disables
+        document.getElementById("home-tab").disabled = true;
+        document.getElementById("gear-tab").disabled = false;
+        document.getElementById("stats-tab").disabled = false;
+        document.getElementById("shop-tab").disabled = false;
+    } else if (mode == 1) {
+        // gear tab
+        document.getElementById("hometabport").style.display = "none";
+        document.getElementById("geartabport").style.display = "block";
+        document.getElementById("statstabport").style.display = "none";
+        document.getElementById("shoptabport").style.display = "none";
+
+        //button disables
+        document.getElementById("home-tab").disabled = false;
+        document.getElementById("gear-tab").disabled = true;
+        document.getElementById("stats-tab").disabled = false;
+        document.getElementById("shop-tab").disabled = false;
+    } else if (mode == 2) {
+        // stats tab
+        document.getElementById("hometabport").style.display = "none";
+        document.getElementById("geartabport").style.display = "none";
+        document.getElementById("statstabport").style.display = "block";
+        document.getElementById("shoptabport").style.display = "none";
+
+        //button disables
+        document.getElementById("home-tab").disabled = false;
+        document.getElementById("gear-tab").disabled = false;
+        document.getElementById("stats-tab").disabled = true;
+        document.getElementById("shop-tab").disabled = false;
+    } else if (mode == 3) {
+        // shop-tab
+        document.getElementById("hometabport").style.display = "none";
+        document.getElementById("geartabport").style.display = "none";
+        document.getElementById("statstabport").style.display = "none";
+        document.getElementById("shoptabport").style.display = "block";
+
+        //button disables
+        document.getElementById("home-tab").disabled = false;
+        document.getElementById("gear-tab").disabled = false;
+        document.getElementById("stats-tab").disabled = false;
+        document.getElementById("shop-tab").disabled = true;
+    }
+}
+
 var leaveMode = false;
 document.getElementById("leave-arena-btn").onclick = function () {
     if (leaveMode == false) {
@@ -15,21 +83,20 @@ document.getElementById("leave-arena-btn").onclick = function () {
         document.getElementById("leave-arena-btn").innerHTML = "cancel";
     } else if (leaveMode == true) {
         leaveMode = false;
-        document.getElementById("leave-arena-btn").innerHTML = "leave arena (" + accountinfo.level[lgusrIndex] + "s)";
+        document.getElementById("leave-arena-btn").innerHTML = "leave arena (10s)";
     }
 
     setTimeout(function () {
         if (accountinfo.place[lgusrIndex] == 1) {
             db.push({ type: "return-lobby", name: lgusr });
-            document.getElementById("leave-arena-btn").innerHTML = "leave arena (" + accountinfo.level[lgusrIndex] + "s)";
+            document.getElementById("leave-arena-btn").innerHTML = "leave arena (10s)";
             goToWindow(1);
         }
-    }, accountinfo.level[lgusrIndex] * 1000)
+    }, 10000)
 }
 
 document.getElementById("ready-trig-btn").addEventListener("click", async () => {
     //change UI display...
-    document.getElementById("uplayer-username").innerHTML = "<i>joining arena...</i>";
     document.getElementById("lobby-idle-btns").style.display = "none";
     document.getElementById("lobby-active-btns").style.display = "block";
 
@@ -89,12 +156,7 @@ function accreq(mode) {
     if (namereq != "" && passreq != "") {
         if (mode == 0) {
             if (accountinfo.name.indexOf(namereq) == -1 && namereq != "null") {
-                var skinToneReq = Math.floor(Math.random() * 10) / 10;
-                var shirtColorReq = Math.floor(Math.random() * 360);
-                var hairColorReq = Math.floor(Math.random() * 10) / 10;
-                var shirtBrightnesReq = Math.floor(Math.random() * 10) / 10;
-
-                db.push({ type: "acc", name: namereq, pass: passreq, hair: hairColorReq, skin: skinToneReq, shirt: shirtColorReq, shirtBrightness: shirtBrightnesReq });
+                db.push({ type: "acc", name: namereq, pass: passreq });
                 login(namereq);
             } else {
                 alert("username already used");
@@ -123,7 +185,6 @@ function goToWindow(mode) {
         accountinfo.health[lgusrIndex] = accountinfo.level[lgusrIndex] * 50;
 
         //lobby port ui display reset
-        document.getElementById("uplayer-username").innerHTML = lgusr;
         document.getElementById("lobby-idle-btns").style.display = "block";
         document.getElementById("lobby-active-btns").style.display = "none";
     } else if (mode == 2) {
@@ -148,7 +209,18 @@ var accountinfo = {
     status: [],
     health: [],
     level: [],
-    attack: [] //attack level based on gear
+    attack: [],
+    focus: [],
+    tgid: []
+}
+
+var accgear = {
+    head: [],
+    cape: [],
+    chest: [],
+    legs: [],
+    rArm: [],
+    lArm: []
 }
 
 var lgusr;
@@ -164,9 +236,6 @@ function login(usrname) {
 
     //set lobby skin, set global skin variable
     // console.log("brightness(" + accountinfo.shirtB[lgusrIndex] + ") hue-rotate(" + accountinfo.shirt[lgusrIndex] + "deg)");
-    document.getElementById("lobby-hair").style.filter = "brightness(" + accountinfo.hair[lgusrIndex] + ")";
-    document.getElementById("lobby-uskin").style.filter = "brightness(" + accountinfo.skin[lgusrIndex] + ")";
-    document.getElementById("lobby-clothes").style.filter = "brightness(" + accountinfo.shirtB[lgusrIndex] + ") hue-rotate(" + accountinfo.shirt[lgusrIndex] + "deg)";
 
     //switch screen based on character place
     if (accountinfo.place[lgusrIndex] == 0) {
@@ -204,6 +273,16 @@ var startListening = function () {
             accountinfo.level.push(1);
             accountinfo.health.push(50);
             accountinfo.attack.push(1);
+            accountinfo.focus.push(-1);
+            accountinfo.tgid(-1);
+
+            //register empty handed gear, all male for now : gender code 0:female, 1:male
+            accgear.head.push(0);
+            accgear.cape.push(0);
+            accgear.chest.push(0);
+            accgear.lArm.push(0);
+            accgear.rArm.push(0);
+            accgear.legs.push(0);
         } else if (snap.type == "join-game-request") {
             var aaindex = accountinfo.name.indexOf(snap.name);
             accountinfo.place[aaindex] = 2;
@@ -332,7 +411,7 @@ var startListening = function () {
             }
         } else if (snap.type == "heal") {
             var healMount = randInt(5, 30);
-            var maxHP = accountinfo.level[snap.who] * 50;
+            var maxHP = 50 + ((accountinfo.level[snap.who] - 1) * 10);
             if ((maxHP - accountinfo.health[snap.who]) >= healMount) {
                 accountinfo.health[snap.who] += healMount;
             } else {
@@ -344,9 +423,11 @@ var startListening = function () {
             }
         } else if (snap.type == "levelup") {
             accountinfo.level[snap.name] += 1;
-            accountinfo.health[snap.name] = accountinfo.level[snap.name] * 50;
+            // accountinfo.health[snap.name] = 50 + ((accountinfo.level[snap.name]-1)*10) ;
         } else if (snap.type == "thisdudedied") {
             accountinfo.level[snap.name] = 1;
+        } else if (snap.type == "newTg") {
+            accountinfo.tgid[snap.own] = snap.ask;
         }
     });
 }
@@ -397,6 +478,20 @@ safeZoneIMG.src = "./assets/terrain/safezone.png";
 
 var focusRing = new Image();
 focusRing.src = "./assets/consume/focusRing.png";
+
+//stack render holder (player)
+var playerLeg = new Image();
+playerLeg.src = "./assets/stackRender/plLegs.png";
+var playerBody = new Image();
+playerBody.src = "./assets/stackRender/plBody.png";
+var playerRArm = new Image();
+playerRArm.src = "./assets/stackRender/plArmRight.png";
+var playerLArm = new Image();
+playerLArm.src = "./assets/stackRender/plArmLeft.png";
+var playerHeadF = new Image();
+playerHeadF.src = "./assets/stackRender/plHeadFemale.png";
+var playerHeadM = new Image();
+playerHeadM.src = "./assets/stackRender/plHeadMale.png";
 
 // ember ud rl lu/rd ld/ru
 var emberSpriteHolder = [];
@@ -469,28 +564,40 @@ function testSpawn(xp, yp) {
 var spawnTick = 100;
 var deadParam = false;
 
+var testAnimate = 0;
+// stackRender player base
+var plLeg = new Image("./assets/plLegs.png");
+var plBody = new Image("./assets/plLegs.png");
+var plArmRight = new Image("./assets/plArmRight.png");
+var plArmLeft = new Image("./assets/plArmLeft.png");
+var plHeadMale = new Image("./assets/plHeadMale.png");
+var plHeadFemale = new Image("./assets/plHeadFemale.png");
+// stackRender, items
+
+
+//animation variable
+var animationFrame = 0;
+
 function animate() {
     var canvas = document.getElementById("aberoyale-window");
     canvas.width = 377.5;
     canvas.height = 600;
     var ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, 500, 500);
+
+    ctx.fillStyle = "#67802d";
+    ctx.fillRect(0, 0, 1000, 1000);
 
     // check and show vitals
     //life bar
     // console.log(((accountinfo.health[lgusrIndex] / (accountinfo.level[lgusrIndex] * 100)) * 100));
-    var healthPerc = ((accountinfo.health[lgusrIndex] / (accountinfo.level[lgusrIndex] * 50)) * 100);
+    var healthPerc = ((accountinfo.health[lgusrIndex] / (50 + ((accountinfo.level[lgusrIndex] - 1) * 10))) * 100);
     document.getElementById("client-life-bar").style.width = healthPerc + "%";
-
-    if (leaveMode == false) {
-        document.getElementById("leave-arena-btn").innerHTML = "leave arena (" + accountinfo.level[lgusrIndex] + "s)";
-    }
 
     if (accountinfo.health[lgusrIndex] == 0) {
         deadParam = true;
         gamemode = false;
     }
-
-    ctx.clearRect(0, 0, 500, 500);
 
     ///draw floor
     ctx.fillStyle = "#67802d";
@@ -535,15 +642,15 @@ function animate() {
 
 
     //draw arround right left and up
-    for (i = 0; i < floorDimension[0]; i++) {
-        ctx.drawImage(terrainWall, (50 - camera[0]) + i, 20 - camera[1], 1, 80);
-    }
-    for (i = 0; i < floorDimension[1] - 80; i++) {
-        ctx.drawImage(terrainWall, (50 - camera[0]), (20 - camera[1]) + i, 10, 80);
-    }
-    for (i = 0; i < floorDimension[1] - 80; i++) {
-        ctx.drawImage(terrainWall, (50 - camera[0]) + floorDimension[0], (20 - camera[1]) + i, 10, 80);
-    }
+    // for (i = 0; i < floorDimension[0]; i++) {
+    //     ctx.drawImage(terrainWall, (50 - camera[0]) + i, 20 - camera[1], 1, 80);
+    // }
+    // for (i = 0; i < floorDimension[1] - 80; i++) {
+    //     ctx.drawImage(terrainWall, (50 - camera[0]), (20 - camera[1]) + i, 10, 80);
+    // }
+    // for (i = 0; i < floorDimension[1] - 80; i++) {
+    //     ctx.drawImage(terrainWall, (50 - camera[0]) + floorDimension[0], (20 - camera[1]) + i, 10, 80);
+    // }
 
     // ctx.drawImage(terrainWall, (50 - camera[0]), 0);
 
@@ -551,14 +658,61 @@ function animate() {
     for (i = 0; i < accountinfo.place.length; i++) {
         if (accountinfo.place[i] == 1) {
             //render player shadow
-            ctx.globalAlpha = 0.2;
-            ctx.fillStyle = "#000000";
-            ctx.fillRect(accountinfo.positionx[i] - camera[0] + 71, accountinfo.positiony[i] - camera[1] + 100, 17, 5);
-            ctx.globalAlpha = 1;
+            // ctx.globalAlpha = 0.2;
+            // ctx.fillStyle = "#000000";
+            // ctx.fillRect(accountinfo.positionx[i] - camera[0] + 71, accountinfo.positiony[i] - camera[1] + 100, 17, 5);
+            // ctx.globalAlpha = 1;
             //player is in arena render player
-            ctx.globalAlpha = 0.5;
-            ctx.drawImage(playerb, accountinfo.positionx[i] - camera[0] + 60, accountinfo.positiony[i] - camera[1] + 25, 40, 80);
+            // ctx.globalAlpha = 0.5;
+            // ctx.drawImage(playerb, accountinfo.positionx[i] - camera[0] + 60, accountinfo.positiony[i] - camera[1] + 25, 40, 80);
+            // ctx.globalAlpha = 1;
+
+            //player direction
+            if (accountinfo.tgid[i] != -1) {
+                var plusMinusX = accountinfo.positionx[i] - accountinfo.positionx[accountinfo.tgid[i]];
+                var plusMinusY = accountinfo.positiony[i] - accountinfo.positiony[accountinfo.tgid[i]];
+                var distX = Math.abs(plusMinusX);
+                var distY = Math.abs(plusMinusY);
+
+                if (plusMinusY < 0 && distY > 10 && distX < 10) {
+                    // down
+                    animationFrame = 4;
+                } else if (plusMinusY > 10 && distY > 10 && distX < 10) {
+                    // up
+                    animationFrame = 0;
+                } else if (plusMinusX < 10 && distX > 10 && distY < 10) {
+                    //right
+                    animationFrame = 2;
+                } else if (plusMinusX > 10 && distX > 10 && distY < 10) {
+                    //left
+                    animationFrame = 6;
+                } else if (plusMinusY > 10 && distX > 10 && plusMinusY < 10 && distY > 10) {
+                    // up right
+                    animationFrame = 1;
+                } else if (plusMinusY > 10 && distX > 10 && plusMinusY > 10 && distY > 10) {
+                    //up left
+                    animationFrame = 7;
+                } else if (plusMinusY < 10 && distX > 10 && plusMinusY < 10 && distY > 10) {
+                    // down right
+                    animationFrame = 3;
+                } else if (plusMinusY < 10 && distX > 10 && plusMinusY > 10 && distY > 10) {
+                    //down left
+                    animationFrame = 5;
+                } else {
+                    animationFrame = 0;
+                }
+            } else {
+                animationFrame = 4;
+            }
+            //render parts
+            ctx.globalAlpha = 0.8;
+            ctx.drawImage(playerBody, 0 + (animationFrame * 52), 0, 52, 50, accountinfo.positionx[i] - camera[0] + 28, accountinfo.positiony[i] - camera[1] + 48, 114, 110);
+            ctx.drawImage(playerHeadM, 0 + (animationFrame * 62), 0, 62, 62, accountinfo.positionx[i] - camera[0] + 18, accountinfo.positiony[i] - camera[1] + 35, 134, 134)
+            ctx.drawImage(playerLeg, 0 + (animationFrame * 30), 0, 30, 26, accountinfo.positionx[i] - camera[0] + 50, accountinfo.positiony[i] - camera[1] + 75, 70, 62);
+            ctx.drawImage(playerRArm, 0 + (animationFrame * 54), 0, 54, 52, accountinfo.positionx[i] - camera[0] + 26, accountinfo.positiony[i] - camera[1] + 48, 118, 114)
+            ctx.drawImage(playerLArm, 0 + (animationFrame * 54), 0, 54, 52, accountinfo.positionx[i] - camera[0] + 26, accountinfo.positiony[i] - camera[1] + 48, 118, 114)
             ctx.globalAlpha = 1;
+
             // ctx.drawImage(players, accountinfo.positionx[i] - camera[0] + 60, accountinfo.positiony[i] - camera[1] + 45, 17, 55);
 
             //draw the ring of justice
@@ -587,7 +741,7 @@ function animate() {
     //render the hp bar
     for (i = 0; i < accountinfo.health.length; i++) {
         //dont render self
-        if (i != lgusrIndex) {
+        if (i != lgusrIndex && accountinfo.place[i] == 1) {
 
             var maxx = accountinfo.level[i] * 50;
             var hitpoint = accountinfo.health[i];
@@ -598,9 +752,10 @@ function animate() {
         }
     }
 
-    for (i = 0; i < floorDimension[0]; i++) {
-        ctx.drawImage(terrainWall, (50 - camera[0]) + i, 20 - camera[1] + floorDimension[1] - 80, 1, 80);
-    }
+    // draw wall thats below
+    // for (i = 0; i < floorDimension[0]; i++) {
+    //     ctx.drawImage(terrainWall, (50 - camera[0]) + i, 20 - camera[1] + floorDimension[1] - 80, 1, 80);
+    // }
 
     // draw client player
     if (inspectKey == true) {
@@ -811,6 +966,8 @@ function animate() {
         }
     }
 
+
+
     setTimeout(function () {
         if (gamemode) {
             animate();
@@ -867,6 +1024,7 @@ var onKeyUp = function (event) {
         case 68: // d
             moveRight = false;
             break;
+
     }
 };
 document.addEventListener('keydown', onKeyDown, false);
@@ -923,6 +1081,7 @@ gameclient.addEventListener("click", function (e) {
             playPunchAudio();
             tgusr = accountinfo.name[i];
             tgusrIndex = i;
+            db.push({ type: "newTg", own: lgusrIndex, ask: tgusrIndex });
             newDamageText(1, i, Math.floor(Math.random() * accountinfo.attack[lgusrIndex]) + 1);
             db.push({ type: "punch-player", attacker: lgusr, recieve: accountinfo.name[i] });
         }
@@ -996,12 +1155,12 @@ var emberVar = {
     att: []
 }
 
-document.getElementById("itemS-1").onclick = function () {
+function csmTrg(ord) {
     // use the consume
-    if (itemslot[0].split("!")[0] == "s") {
+    if (itemslot[ord].split("!")[0] == "s") {
         // scrolls used
         console.log("scroll use");
-        if (itemslot[0].split("!")[1] == "1") {
+        if (itemslot[ord].split("!")[1] == "1") {
             console.log("ember use");
             //ember
             if (tgusrIndex != -1) {
@@ -1016,17 +1175,17 @@ document.getElementById("itemS-1").onclick = function () {
                 db.push({ type: "ember-shoot", who: lgusrIndex, target: tgusrIndex, xspd: xspd, yspd: yspd, att: att });
                 // remove element from the slot
                 if (itemslot.length != 1) {
-                    itemslot.splice(0, 1);
+                    itemslot.splice(ord, 1);
                 } else {
                     itemslot = [];
                 }
                 updateSlots();
             }
-        } else if (itemslot[0].split("!")[1] == "3") {
+        } else if (itemslot[ord].split("!")[1] == "3") {
             db.push({ type: "heal", who: lgusrIndex });
             // remove element from the slot
             if (itemslot.length != 1) {
-                itemslot.splice(0, 1);
+                itemslot.splice(ord, 1);
             } else {
                 itemslot = [];
             }
@@ -1034,146 +1193,7 @@ document.getElementById("itemS-1").onclick = function () {
         } else {
             // remove element from the slot
             if (itemslot.length != 1) {
-                itemslot.splice(0, 1);
-            } else {
-                itemslot = [];
-            }
-            updateSlots();
-        }
-    }
-}
-document.getElementById("itemS-2").onclick = function () {
-    // use the consume
-    if (itemslot[1].split("!")[0] == "s") {
-        // scrolls used
-        console.log("scroll use");
-        if (itemslot[1].split("!")[1] == "1") {
-            console.log("ember use");
-            //ember
-            if (tgusrIndex != -1) {
-                console.log("make it fly");
-                //make ember fly
-                var att = randInt(15, 35);
-                var flyRatioY = (accountinfo.positiony[tgusrIndex] - accountinfo.positiony[lgusrIndex]);
-                var flyRatioX = (accountinfo.positionx[tgusrIndex] - accountinfo.positionx[lgusrIndex]);
-                var yspd = flyRatioY / 10;
-                var xspd = flyRatioX / 10;
-
-                db.push({ type: "ember-shoot", who: lgusrIndex, target: tgusrIndex, xspd: xspd, yspd: yspd, att: att });
-                // remove element from the slot
-                if (itemslot.length != 1) {
-                    itemslot.splice(1, 1);
-                } else {
-                    itemslot = [];
-                }
-                updateSlots();
-            }
-        } else if (itemslot[1].split("!")[1] == "3") {
-            db.push({ type: "heal", who: lgusrIndex });
-            // remove element from the slot
-            if (itemslot.length != 1) {
-                itemslot.splice(1, 1);
-            } else {
-                itemslot = [];
-            }
-            updateSlots();
-        } else {
-            // remove element from the slot
-            if (itemslot.length != 1) {
-                itemslot.splice(1, 1);
-            } else {
-                itemslot = [];
-            }
-            updateSlots();
-        }
-    }
-}
-document.getElementById("itemS-3").onclick = function () {
-    // use the consume
-    if (itemslot[2].split("!")[0] == "s") {
-        // scrolls used
-        console.log("scroll use");
-        if (itemslot[2].split("!")[1] == "1") {
-            console.log("ember use");
-            //ember
-            if (tgusrIndex != -1) {
-                console.log("make it fly");
-                //make ember fly
-                var att = randInt(15, 35);
-                var flyRatioY = (accountinfo.positiony[tgusrIndex] - accountinfo.positiony[lgusrIndex]);
-                var flyRatioX = (accountinfo.positionx[tgusrIndex] - accountinfo.positionx[lgusrIndex]);
-                var yspd = flyRatioY / 10;
-                var xspd = flyRatioX / 10;
-
-                db.push({ type: "ember-shoot", who: lgusrIndex, target: tgusrIndex, xspd: xspd, yspd: yspd, att: att });
-                // remove element from the slot
-                if (itemslot.length != 1) {
-                    itemslot.splice(2, 1);
-                } else {
-                    itemslot = [];
-                }
-                updateSlots();
-            }
-        } else if (itemslot[2].split("!")[1] == "3") {
-            db.push({ type: "heal", who: lgusrIndex });
-            // remove element from the slot
-            if (itemslot.length != 1) {
-                itemslot.splice(2, 1);
-            } else {
-                itemslot = [];
-            }
-            updateSlots();
-        } else {
-            // remove element from the slot
-            if (itemslot.length != 1) {
-                itemslot.splice(2, 1);
-            } else {
-                itemslot = [];
-            }
-            updateSlots();
-        }
-    }
-}
-
-document.getElementById("itemS-4").onclick = function () {
-    // use the consume
-    if (itemslot[3].split("!")[0] == "s") {
-        // scrolls used
-        console.log("scroll use");
-        if (itemslot[3].split("!")[1] == "1") {
-            console.log("ember use");
-            //ember
-            if (tgusrIndex != -1) {
-                console.log("make it fly");
-                //make ember fly
-                var att = randInt(15, 35);
-                var flyRatioY = (accountinfo.positiony[tgusrIndex] - accountinfo.positiony[lgusrIndex]);
-                var flyRatioX = (accountinfo.positionx[tgusrIndex] - accountinfo.positionx[lgusrIndex]);
-                var yspd = flyRatioY / 10;
-                var xspd = flyRatioX / 10;
-
-                db.push({ type: "ember-shoot", who: lgusrIndex, target: tgusrIndex, xspd: xspd, yspd: yspd, att: att });
-                // remove element from the slot
-                if (itemslot.length != 1) {
-                    itemslot.splice(3, 1);
-                } else {
-                    itemslot = [];
-                }
-                updateSlots();
-            }
-        } else if (itemslot[3].split("!")[1] == "3") {
-            db.push({ type: "heal", who: lgusrIndex });
-            // remove element from the slot
-            if (itemslot.length != 1) {
-                itemslot.splice(3, 1);
-            } else {
-                itemslot = [];
-            }
-            updateSlots();
-        } else {
-            // remove element from the slot
-            if (itemslot.length != 1) {
-                itemslot.splice(3, 1);
+                itemslot.splice(ord, 1);
             } else {
                 itemslot = [];
             }
@@ -1197,3 +1217,5 @@ function updateSlots() {
         }
     }
 }
+
+// lobby tabs
