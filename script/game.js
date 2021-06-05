@@ -849,6 +849,7 @@ function animate() {
         ctx.fillText("You died. Reload page", 10, 30);
         deadParam = false;
         document.getElementById("leave-arena-btn").style.display = "none";
+        document.getElementById("game-dom-elements").style.display = "none";
     }
 
 
