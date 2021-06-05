@@ -185,7 +185,7 @@ img {
     left: 43px;
     z-index: 200;
     min-width: 290px;
-    pointer-events: none;
+    /* pointer-events: none; */
 }
 
 .client-life-bar-wrap {
