@@ -626,6 +626,7 @@ function animate() {
                     ctx.globalAlpha = 0.5;
                 }
                 ctx.drawImage(scrolls[parseInt(consumes.allList[i].split("!")[1])], consumes.positionx[i] - 9 - camera[0], consumes.positiony[i] - consumes.float[i] - 3 - camera[1], 17, 5);
+                ctx.drawImage();
                 ctx.globalAlpha = 1;
                 if (consumes.float[i] == 200) {
                     audioPlayer.push(scrollDropAudio);
@@ -844,8 +845,8 @@ function animate() {
         ctx.font = '20px sans-serif';
         ctx.strokeStyle = '#000000';
         ctx.fillStyle = '#ffffff';
-        ctx.strokeText("You died.", 10, 30);
-        ctx.fillText("You died.", 10, 30);
+        ctx.strokeText("You died. Reload page", 10, 30);
+        ctx.fillText("You died. Reload page", 10, 30);
         deadParam = false;
     }
 
