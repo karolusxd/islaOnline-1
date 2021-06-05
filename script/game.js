@@ -1168,7 +1168,7 @@ function csmTrg(ord) {
             if (tgusrIndex != -1) {
                 console.log("make it fly");
                 //make ember fly
-                var att = randInt(15, 35);
+                var att = randInt(5, 15);
                 var flyRatioY = (accountinfo.positiony[tgusrIndex] - accountinfo.positiony[lgusrIndex]);
                 var flyRatioX = (accountinfo.positionx[tgusrIndex] - accountinfo.positionx[lgusrIndex]);
                 var yspd = flyRatioY / 10;
