@@ -274,7 +274,7 @@ var startListening = function () {
             accountinfo.health.push(50);
             accountinfo.attack.push(1);
             accountinfo.focus.push(-1);
-            accountinfo.tgid(-1);
+            accountinfo.tgid.push(-1);
 
             //register empty handed gear, all male for now : gender code 0:female, 1:male
             accgear.head.push(0);
