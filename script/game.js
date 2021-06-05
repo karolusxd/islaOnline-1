@@ -626,7 +626,7 @@ function animate() {
                     ctx.globalAlpha = 0.5;
                 }
                 ctx.drawImage(scrolls[parseInt(consumes.allList[i].split("!")[1])], consumes.positionx[i] - 9 - camera[0], consumes.positiony[i] - consumes.float[i] - 3 - camera[1], 17, 5);
-                ctx.drawImage();
+                // ctx.drawImage();
                 ctx.globalAlpha = 1;
                 if (consumes.float[i] == 200) {
                     audioPlayer.push(scrollDropAudio);
