@@ -185,12 +185,12 @@ img {
     left: 43px;
     z-index: 200;
     min-width: 290px;
-    /* pointer-events: none; */
+    pointer-events: none;
 }
 
 .client-life-bar-wrap {
     position: absolute;
-    top: -40px;
+    top: -15px;
     height: 10px;
     width: 290px;
     background: #030608;
@@ -234,19 +234,19 @@ img {
 
 #leave-arena-btn {
     position: absolute;
-    top: -500px;
-    right: -30px;
-    font-size: 20px;
-    padding: 10px 10px 10px 10px;
+    top: -511px;
+    right: -42px;
+    font-size: 14px;
+    padding: 3px 5px 3px 5px;
 }
 
 .runCoolDownWrap {
     position: absolute;
-    top: -100px;
+    top: -45px;
     left: 0px;
-    width: 40px;
-    height: 40px;
-    border: 4px solid #fff;
+    width: 26px;
+    height: 26px;
+    border: none;
     background: rgba(0,0,0,0.4);
 }
 
@@ -254,9 +254,9 @@ img {
     position: absolute;
     bottom: 0px;
     left: 0px;
-    width: 32px;
-    height: 32px;
-    border: 4px solid #fff;
+    width: 26px;
+    height: 15px;
+    border: none;
     background: #fff;
 }
 
@@ -264,9 +264,9 @@ img {
     position: absolute;
     bottom: 0px;
     left: 0px;
-    width: 32px;
-    height: 32px;
-    border: 4px solid #fff;
+    width: 20px;
+    height: 20px;
+    border: 3px solid transparent;
     background: transparent;
 }
 
@@ -367,4 +367,31 @@ img {
     margin-right: auto;
     margin-left: auto;
     margin-top: -20px;
+}
+.titleArea {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: stretch;
+    justify-content: space-evenly;
+}
+.logo {
+    height: 50px;
+}
+.titleText {
+    /* nothing */
+}
+input, button {
+    pointer-events: all !important;
+    outline: none;
+}
+#chatboxxx {
+    position: absolute;
+    top: 59px;
+    left: -43px;
+    background: rgba(0,0,0,0.4);
+    border: none;
+    padding: 5px;
+    pointer-events: all;
+    outline: none;
+    color: #fff;
 }
