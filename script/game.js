@@ -1,7 +1,20 @@
+'use strict';
+
 // dom element variables
 var gameclient = document.getElementById("aberoyale-window");
 var lobbyclient = document.getElementById("lobby-port");
 var acccclient = document.getElementById("login-port");
+
+var consumes = {
+    allList: [],
+    positionx: [],
+    positiony: [],
+    float: [],
+    pickup: []
+}
+
+var moveCoolDown = 500;
+var punchCoolDown = 100;
 
 //dom element events
 document.getElementById("crrAccBtn").addEventListener("click", async () => {
@@ -205,6 +218,8 @@ var accountinfo = {
     shirtB: [],
     positionx: [],
     positiony: [],
+    destx: [],
+    desty: [],
     place: [], // 0 : lobby, 1 : arena, 2 : waiting server join
     status: [],
     health: [],
@@ -235,7 +250,6 @@ function login(usrname) {
     lgusrIndex = accountinfo.name.indexOf(lgusr);
 
     //set lobby skin, set global skin variable
-    // console.log("brightness(" + accountinfo.shirtB[lgusrIndex] + ") hue-rotate(" + accountinfo.shirt[lgusrIndex] + "deg)");
 
     //switch screen based on character place
     if (accountinfo.place[lgusrIndex] == 0) {
@@ -258,6 +272,7 @@ function updateFrame() {
 
 //debuff interval vars
 var bindInterval = 0;
+var fatigueInterval = 0;
 
 var startListening = function () {
     db.on('child_added', function (snapshot) {
@@ -275,7 +290,7 @@ var startListening = function () {
             accountinfo.status.push(1); // 1 is alive, 0 is dead
             accountinfo.level.push(1);
             accountinfo.health.push(50);
-            accountinfo.attack.push(1);
+            accountinfo.attack.push(5);
             accountinfo.focus.push(-1);
             accountinfo.tgid.push(-1);
 
@@ -315,20 +330,27 @@ var startListening = function () {
             accountinfo.health[accountinfo.name.indexOf(snap.name)] = 50 + ((accountinfo.level[accountinfo.name.indexOf(snap.name)] - 1) * 10);
         } else if (snap.type == "player-new-position") {
             // new position
-            // console.log(lgusrIndex);
             accountinfo.positionx[accountinfo.name.indexOf(snap.name)] = snap.positionx;
             accountinfo.positiony[accountinfo.name.indexOf(snap.name)] = snap.positiony;
             if (gamemode) {
                 //avoid existing embers
                 if (snap.name == lgusr) {
                     for (i = 0; i < emberVar.life.length; i++) {
-                        if (emberVar.target[i] == lgusrIndex && emberVar.hit[i] == 1) {
+                        var emberBoolean = emberVar.target[i] == lgusrIndex && emberVar.hit[i] == 1;
+                        var physicalBoolean = physicalVar.target[i] == lgusrIndex && physicalVar.hit[i] == 1;
+                        var bindBoolean = bindVar.target[i] == lgusrIndex && bindVar.hit[i] == 1;
+                        if (emberBoolean && physicalBoolean && bindBoolean) {
                             emberVar.hit[i] = 0;
+                            physicalVar.hit[i] = 0;
+                            bindVar.hit[i] = 0;
+                            fatigueVar.hit[i] = 0;
                         }
                     }
                 }
             }
         }
+
+
         //game server stuff
         if (snap.type == "new-consume-drop") {
             if (snap.ctype == "scroll") {
@@ -341,8 +363,6 @@ var startListening = function () {
             }
         } else if (snap.type == "item-pickup") {
             var scrollId = parseInt(snap.consumePoint);
-            // console.log(scrollId);
-            // console.log(consumes.allList[scrollId]);
             consumes.allList.splice(scrollId, 1);
             consumes.positionx.splice(scrollId, 1);
             consumes.positiony.splice(scrollId, 1);
@@ -351,15 +371,11 @@ var startListening = function () {
         } else if (snap.type == "punch-player") {
             //player attacked snap
             var attackPowaa = Math.floor(Math.random() * accountinfo.attack[snap.recieve]) + 1;
-            // console.log(attackPowaa);
             newDamageText(1, snap.recieve, "(" + attackPowaa + ")");
-            // console.log(accountinfo.health[accountinfo.name.indexOf(snap.recieve)]);
             if (attackPowaa >= accountinfo.health[accountinfo.name.indexOf(snap.recieve)]) {
                 accountinfo.health[snap.recieve] = 0;
-                // console.log(accountinfo.health[accountinfo.name.indexOf(snap.recieve)]);
             } else {
                 accountinfo.health[snap.recieve] -= attackPowaa;
-                // console.log(accountinfo.health[accountinfo.name.indexOf(snap.recieve)]);
             }
 
             if (snap.recieve == lgusr && gamemode) {
@@ -367,33 +383,37 @@ var startListening = function () {
                 // punchPref.play();
             }
 
-            if (snap.attacker == lgusr && accountinfo.health[snap.recieve] <= 0) {
+            if (snap.attacker == lgusrIndex && accountinfo.health[snap.recieve] <= 0) {
                 db.push({ type: "return-lobby", name: accountinfo.name[snap.recieve] });
                 newDamageText(1, snap.recieve, "AAAAAAAARRRRRRRRGGGGGGHHH");
-                tgusrIndex = -1;
-                tgusr = "";
                 db.push({ type: "thisdudedied", name: snap.recieve });
                 db.push({ type: "levelup", name: snap.attacker });
+                if (tgusrIndex == snap.recieve) {
+                    tgusrIndex = -1;
+                    tgusr = "";
+                }
             }
-        } else if( snap.type == "bind-player" ) {
-            if( gamemode && snap.recieve == lgusrIndex ) {
+        } else if (snap.type == "bind-player") {
+            if (gamemode && snap.recieve == lgusrIndex) {
                 //it hit you
-                bindInterval += 500;
+                bindInterval += 150;
+            }
+        } else if (snap.type == "fatigue-player") {
+            if (gamemode && snap.recieve == lgusrIndex) {
+                //
+                fatigueInterval += 150;
             }
         } else if (snap.type == "ember-hit") {
             var attackPowaa = parseInt(snap.att);
-            // console.log(accountinfo.health[accountinfo.name.indexOf(snap.recieve)]);
-            newDamageText(2, snap.target,  "(" + attackPowaa + ")");
+            newDamageText(2, snap.target, "(" + attackPowaa + ")");
             if (attackPowaa >= accountinfo.health[snap.target]) {
                 accountinfo.health[snap.target] = 0;
-                // console.log(accountinfo.health[accountinfo.name.indexOf(snap.recieve)]);
             } else {
                 accountinfo.health[snap.target] -= attackPowaa;
-                // console.log(accountinfo.health[accountinfo.name.indexOf(snap.recieve)]);
             }
 
             if (snap.target == lgusr && gamemode) {
-                newDamageText(3, lgusrIndex,  "(" + attackPowaa + ")");
+                newDamageText(3, lgusrIndex, "(" + attackPowaa + ")");
             }
 
             if (snap.who == lgusrIndex && accountinfo.health[snap.target] <= 0) {
@@ -418,9 +438,9 @@ var startListening = function () {
                 emberVar.who.push(parseInt(snap.who));
                 emberVar.att.push(parseInt(snap.att));
             }
-        } else if( snap.type == "bind-shoot" ) {
-            if( gamemode ) {
-                bindVar.life.push(20);
+        } else if (snap.type == "bind-shoot") {
+            if (gamemode) {
+                bindVar.life.push(40);
                 bindVar.hit.push(1);
                 bindVar.posx.push(0);
                 bindVar.posy.push(0);
@@ -429,7 +449,18 @@ var startListening = function () {
                 bindVar.target.push(parseInt(snap.target));
                 bindVar.who.push(parseInt(snap.who));
             }
-        } else if( snap.type == "punch-shoot" ) {
+        } else if (snap.type == "fatigue-shoot") {
+            if (gamemode) {
+                fatigueVar.life.push(40);
+                fatigueVar.hit.push(1);
+                fatigueVar.posx.push(0);
+                fatigueVar.posy.push(0);
+                fatigueVar.spdx.push(parseInt(snap.xspd));
+                fatigueVar.spdy.push(parseInt(snap.yspd));
+                fatigueVar.target.push(parseInt(snap.target));
+                fatigueVar.who.push(parseInt(snap.who));
+            }
+        } else if (snap.type == "punch-shoot") {
             if (gamemode) {
                 physicalVar.life.push(20);
                 physicalVar.hit.push(1);
@@ -460,9 +491,9 @@ var startListening = function () {
             accountinfo.level[snap.name] = 1;
         } else if (snap.type == "newTg") {
             accountinfo.tgid[snap.own] = snap.ask;
-        } else if( snap.type == "chat" ) {
-            if( gamemode ) {
-                newDamageText(4, snap.who, snap.text );
+        } else if (snap.type == "chat") {
+            if (gamemode) {
+                newDamageText(4, snap.who, snap.text);
             }
         }
     });
@@ -488,8 +519,9 @@ window.addEventListener("beforeunload", function (e) {
 }, false);
 
 function startGame() {
-    // console.log("game canvas access start");
     gamemode = true;
+    document.getElementById("leave-arena-btn").style.display = "block";
+    document.getElementById("game-dom-elements").style.display = "block";
     animate();
 }
 
@@ -548,17 +580,10 @@ var physicalSprites = new Image();
 physicalSprites.src = "./assets/projectile/physicalSprite.png";;
 
 var scrolls = [];
+var i;
 for (i = 0; i < 8; i++) {
     scrolls[i] = new Image();
     scrolls[i].src = "./assets/consume/scroll_t" + i + ".png";
-}
-
-var consumes = {
-    allList: [],
-    positionx: [],
-    positiony: [],
-    float: [],
-    pickup: []
 }
 
 var scrollDropAudio = new Audio("./assets/audio/scrollDrop.mp3");
@@ -575,21 +600,17 @@ var audioPlayer = [];
 function spawn(mode) {
     if (mode == 0) {
         // scroll
-        // console.log("new scroll");
         var scrollTier = Math.floor(Math.random() * 4);
         // var scrollTier = 1;
         var dropPositionX = Math.floor(Math.random() * floorDimension[0] - 30) + 70;
         var dropPositionY = Math.floor(Math.random() * floorDimension[0] - 90) + 105;
         // if (consumes.positionx.indexOf(dropPositionX) != consumes.positiony.indexOf(dropPositionY)) {
         db.push({ type: "new-consume-drop", ctype: "scroll", tier: scrollTier, positionx: dropPositionX, positiony: dropPositionY });
-        // console.log(dropPositionX + "," + dropPositionY);
         // }
     } else if (mode == 1) {
         // potion
-        // console.log("new potion");
     } else if (mode == 2) {
         // gear
-        // console.log("new gear");
     }
 }
 
@@ -597,7 +618,6 @@ function testSpawn(xp, yp) {
     var scrollTier = Math.floor(Math.random() * 7);
     // if (consumes.positionx.indexOf(dropPositionX) != consumes.positiony.indexOf(dropPositionY)) {
     db.push({ type: "new-consume-drop", ctype: "scroll", tier: scrollTier, positionx: xp, positiony: yp });
-    // console.log(dropPositionX + "," + dropPositionY);
 }
 
 var spawnTick = 100;
@@ -629,7 +649,6 @@ function animate() {
 
     // check and show vitals
     //life bar
-    // console.log(((accountinfo.health[lgusrIndex] / (accountinfo.level[lgusrIndex] * 100)) * 100));
     var healthPerc = ((accountinfo.health[lgusrIndex] / (50 + ((accountinfo.level[lgusrIndex] - 1) * 10))) * 100);
     document.getElementById("client-life-bar").style.width = healthPerc + "%";
 
@@ -649,9 +668,7 @@ function animate() {
     // ctx.fillStyle = "#0000006b";
     // ctx.fillRect(100, 150, 17, 5);
     //render the consumes, update position
-    // console.log(consumes.allList.length);
     for (i = 0; i < consumes.allList.length; i++) {
-        // console.log(consumes.pickup[i]);
         if (consumes.pickup[i] == 1) {
             //not picked up
             //render shadow
@@ -783,7 +800,7 @@ function animate() {
         //dont render self
         if (i != lgusrIndex && accountinfo.place[i] == 1) {
 
-            var maxx = accountinfo.level[i] * 50;
+            var maxx = 50 + ((accountinfo.level[i] - 1) * 10);
             var hitpoint = accountinfo.health[i];
             ctx.fillStyle = "#404040";
             ctx.fillRect(accountinfo.positionx[i] - camera[0] + 63, accountinfo.positiony[i] - camera[1] + 10, 40, 3);
@@ -876,6 +893,19 @@ function animate() {
         document.getElementById("runCoolDownBar").style.height = (26 - (26 * (moveCoolDown / 500))) + "px";
     }
 
+    if (punchCoolDown != 0) {
+        if (fatigueInterval == 0) {
+            if (punchCoolDown >= 6) {
+                punchCoolDown -= 6;
+            } else {
+                punchCoolDown = 0;
+            }
+        } else {
+            punchCoolDown -= 2;
+        }
+        document.getElementById("punchCoolDownBar").style.height = (26 - (26 * (punchCoolDown / 100))) + "px";
+    }
+
     if (deadParam) {
         ctx.globalAlpha = 0.5;
         ctx.fillStyle = "#ff0000";
@@ -892,7 +922,7 @@ function animate() {
     }
 
 
-    
+
     // render embers
     for (i = 0; i < emberVar.life.length; i++) {
         var emberRL = Math.abs(emberVar.spdy[i]) < Math.abs(emberVar.spdx[i]);
@@ -914,7 +944,7 @@ function animate() {
         } else {
             if (emberRL) {
                 //right or left
-                if( emberVar.spdx[i] > 0 ) {
+                if (emberVar.spdx[i] > 0) {
                     //right
                     emberRenderFrame = 2;
                 } else {
@@ -923,7 +953,7 @@ function animate() {
                 }
             } else {
                 // up or down
-                if( emberVar.spdy[i] > 0 ) {
+                if (emberVar.spdy[i] > 0) {
                     //down
                     emberRenderFrame = 4;
                 } else {
@@ -933,7 +963,7 @@ function animate() {
             }
         }
         ctx.globalAlpha = 0.6;
-        ctx.drawImage( emberSpriteS, 0+(36*emberRenderFrame), 0, 36, 30, accountinfo.positionx[emberVar.who[i]] + emberVar.posx[i] - camera[0] + 40, accountinfo.positiony[emberVar.who[i]] + emberVar.posy[i] - camera[1] + 55, 82, 70 );
+        ctx.drawImage(emberSpriteS, 0 + (36 * emberRenderFrame), 0, 36, 30, accountinfo.positionx[emberVar.who[i]] + emberVar.posx[i] - camera[0] + 40, accountinfo.positiony[emberVar.who[i]] + emberVar.posy[i] - camera[1] + 55, 82, 70);
         ctx.globalAlpha = 1;
         emberVar.posx[i] += emberVar.spdx[i];
         emberVar.posy[i] += emberVar.spdy[i];
@@ -961,7 +991,7 @@ function animate() {
         } else {
             if (physRL) {
                 //right or left
-                if( physicalVar.spdx[i] > 0 ) {
+                if (physicalVar.spdx[i] > 0) {
                     //right
                     physicalRenderFrame = 2;
                 } else {
@@ -970,7 +1000,7 @@ function animate() {
                 }
             } else {
                 // up or down
-                if( physicalVar.spdy[i] > 0 ) {
+                if (physicalVar.spdy[i] > 0) {
                     //down
                     physicalRenderFrame = 4;
                 } else {
@@ -980,7 +1010,7 @@ function animate() {
             }
         }
         ctx.globalAlpha = 0.6;
-        ctx.drawImage( physicalSprites, 0+(36*physicalRenderFrame), 0, 36, 30, accountinfo.positionx[physicalVar.who[i]] + physicalVar.posx[i] - camera[0] + 40, accountinfo.positiony[physicalVar.who[i]] + physicalVar.posy[i] - camera[1] + 55, 82, 70 );
+        ctx.drawImage(physicalSprites, 0 + (36 * physicalRenderFrame), 0, 36, 30, accountinfo.positionx[physicalVar.who[i]] + physicalVar.posx[i] - camera[0] + 40, accountinfo.positiony[physicalVar.who[i]] + physicalVar.posy[i] - camera[1] + 55, 82, 70);
         ctx.globalAlpha = 1;
         physicalVar.posx[i] += physicalVar.spdx[i];
         physicalVar.posy[i] += physicalVar.spdy[i];
@@ -1008,7 +1038,7 @@ function animate() {
         } else {
             if (bindRL) {
                 //right or left
-                if( bindVar.spdx[i] > 0 ) {
+                if (bindVar.spdx[i] > 0) {
                     //right
                     bindRenderFrame = 2;
                 } else {
@@ -1017,7 +1047,7 @@ function animate() {
                 }
             } else {
                 // up or down
-                if( bindVar.spdy[i] > 0 ) {
+                if (bindVar.spdy[i] > 0) {
                     //down
                     bindRenderFrame = 4;
                 } else {
@@ -1027,18 +1057,65 @@ function animate() {
             }
         }
         ctx.globalAlpha = 0.6;
-        ctx.drawImage( bindSpriteS, 0+(36*bindRenderFrame), 0, 36, 30, accountinfo.positionx[bindVar.who[i]] + bindVar.posx[i] - camera[0] + 40, accountinfo.positiony[bindVar.who[i]] + bindVar.posy[i] - camera[1] + 55, 82, 70 );
+        ctx.drawImage(bindSpriteS, 0 + (36 * bindRenderFrame), 0, 36, 30, accountinfo.positionx[bindVar.who[i]] + bindVar.posx[i] - camera[0] + 40, accountinfo.positiony[bindVar.who[i]] + bindVar.posy[i] - camera[1] + 55, 82, 70);
         ctx.globalAlpha = 1;
         bindVar.posx[i] += bindVar.spdx[i];
         bindVar.posy[i] += bindVar.spdy[i];
         bindVar.life[i] -= 1;
     }
 
+    // render fatigue
+    for (i = 0; i < fatigueVar.life.length; i++) {
+        var fatigueRL = Math.abs(fatigueVar.spdy[i]) < Math.abs(fatigueVar.spdx[i]);
+        var fatigueRatio = Math.abs(fatigueVar.spdy[i] / fatigueVar.spdx[i]);
+        if (fatigueRatio >= 0.5 && fatigueRatio <= 1.5) {
+            if (fatigueVar.spdx[i] > 0 && fatigueVar.spdy[i] > 0) {
+                // right down
+                fatigueRenderFrame = 3;
+            } else if (fatigueVar.spdx[i] < 0 && fatigueVar.spdy[i] > 0) {
+                // left down
+                fatigueRenderFrame = 5;
+            } else if (fatigueVar.spdx[i] > 0 && fatigueVar.spdy[i] < 0) {
+                // right up
+                fatigueRenderFrame = 1;
+            } else if (fatigueVar.spdx[i] < 0 && fatigueVar.spdy[i] < 0) {
+                // left up
+                fatigueRenderFrame = 7;
+            }
+        } else {
+            if (fatigueRL) {
+                //right or left
+                if (fatigueVar.spdx[i] > 0) {
+                    //right
+                    fatigueRenderFrame = 2;
+                } else {
+                    //left
+                    fatigueRenderFrame = 6;
+                }
+            } else {
+                // up or down
+                if (fatigueVar.spdy[i] > 0) {
+                    //down
+                    fatigueRenderFrame = 4;
+                } else {
+                    //up
+                    fatigueRenderFrame = 0;
+                }
+            }
+        }
+        ctx.globalAlpha = 0.6;
+        ctx.drawImage(fatigueSprites, 0 + (36 * fatigueRenderFrame), 0, 36, 30, accountinfo.positionx[fatigueVar.who[i]] + fatigueVar.posx[i] - camera[0] + 40, accountinfo.positiony[fatigueVar.who[i]] + fatigueVar.posy[i] - camera[1] + 55, 82, 70);
+        ctx.globalAlpha = 1;
+        fatigueVar.posx[i] += fatigueVar.spdx[i];
+        fatigueVar.posy[i] += fatigueVar.spdy[i];
+        fatigueVar.life[i] -= 1;
+    }
+
     // remove any, or hit (physical)
     var spliceCount = 0;
     for (i = 0; i < physicalVar.life.length; i++) {
         if (physicalVar.life[i] == 0) {
-            if (physicalVar.who[i] == lgusrIndex && physicalVar.hit[i] == 1) {
+            if (physicalVar.who[i] == lgusrIndex && physicalVar.hit[i] == 1 && accountinfo.place[physicalVar.target[i]] == 1) {
                 //its your ember, and it hit a person
                 db.push({ type: "punch-player", attacker: physicalVar.who[i], recieve: physicalVar.target[i] });
             }
@@ -1056,11 +1133,33 @@ function animate() {
         }
     }
 
+    // remove any, or hit (fatigue)
+    var spliceCount = 0;
+    for (i = 0; i < fatigueVar.life.length; i++) {
+        if (fatigueVar.life[i] == 0) {
+            if (fatigueVar.who[i] == lgusrIndex && fatigueVar.hit[i] == 1 && accountinfo.place[fatigueVar.target[i]] == 1) {
+                //its your ember, and it hit a person
+                db.push({ type: "fatigue-player", attacker: fatigueVar.who[i], recieve: fatigueVar.target[i] });
+            }
+
+            //delete it
+            fatigueVar.who.splice(i - spliceCount, 1);
+            fatigueVar.target.splice(i - spliceCount, 1);
+            fatigueVar.posx.splice(i - spliceCount, 1);
+            fatigueVar.posy.splice(i - spliceCount, 1);
+            fatigueVar.spdx.splice(i - spliceCount, 1);
+            fatigueVar.spdy.splice(i - spliceCount, 1);
+            fatigueVar.hit.splice(i - spliceCount, 1);
+            fatigueVar.life.splice(i - spliceCount, 1);
+            spliceCount += 1;
+        }
+    }
+
     // remove any, or hit (bind)
     var spliceCount = 0;
     for (i = 0; i < bindVar.life.length; i++) {
         if (bindVar.life[i] == 0) {
-            if (bindVar.who[i] == lgusrIndex && bindVar.hit[i] == 1) {
+            if (bindVar.who[i] == lgusrIndex && bindVar.hit[i] == 1 && accountinfo.place[bindVar.target[i]] == 1) {
                 //its your ember, and it hit a person
                 db.push({ type: "bind-player", attacker: bindVar.who[i], recieve: bindVar.target[i] });
             }
@@ -1082,7 +1181,7 @@ function animate() {
     var spliceCount = 0;
     for (i = 0; i < emberVar.life.length; i++) {
         if (emberVar.life[i] == 0) {
-            if (emberVar.who[i] == lgusrIndex && emberVar.hit[i] == 1) {
+            if (emberVar.who[i] == lgusrIndex && emberVar.hit[i] == 1 && accountinfo.place[emberVar.target[i]] == 1) {
                 //its your ember, and it hit a person
                 db.push({ type: "ember-hit", who: emberVar.who[i], target: emberVar.target[i], att: emberVar.att[i] });
             }
@@ -1102,7 +1201,6 @@ function animate() {
 
     //damage text render
     for (i = 0; i < dmgTexts.life.length; i++) {
-        console.log("called");
         ctx.font = '15px serif';
         if (dmgTexts.mode[i] == 1) {
             //physical attack
@@ -1119,16 +1217,16 @@ function animate() {
             // ctx.globalAlpha = dmgTexts.life[i];
             ctx.fillStyle = "#ed7573";
             ctx.strokeStyle = 'black';
-        } else if ( dmgTexts.mode[i] == 4 ) {
+        } else if (dmgTexts.mode[i] == 4) {
             //plain text
-            ctx.fillStyle = "#afafaf";
+            ctx.fillStyle = "#ffffff";
             ctx.strokeStyle = 'black';
-        } else if( dmgTexts.mode[i] == 5 ) {
+        } else if (dmgTexts.mode[i] == 5) {
             //heal text
             ctx.fillStyle = "#8bc34a";
             ctx.strokeStyle = 'black';
         }
-        var textPosX = accountinfo.positionx[dmgTexts.who[i]] - camera[0] + 78 - (dmgTexts.amount[i].length*4);
+        var textPosX = accountinfo.positionx[dmgTexts.who[i]] - camera[0] + 78 - (dmgTexts.amount[i].length * 4);
         ctx.strokeText(dmgTexts.amount[i], textPosX, accountinfo.positiony[dmgTexts.who[i]] + dmgTexts.posy[i] - camera[1] + 60);
         ctx.fillText(dmgTexts.amount[i], textPosX, accountinfo.positiony[dmgTexts.who[i]] + dmgTexts.posy[i] - camera[1] + 60);
         ctx.globalAlpha = 1;
@@ -1151,11 +1249,21 @@ function animate() {
         }
     }
 
-    if( bindInterval != 0 ) {
+    if (bindInterval != 0) {
         bindInterval -= 1;
         gameclient.style.filter = "invert(1)"
     } else {
         gameclient.style.filter = "invert(0)";
+    }
+
+    if (fatigueInterval != 0) {
+        fatigueInterval -= 1;
+    }
+
+    //check if you're actually in arena
+    if (accountinfo.place[lgusrIndex] == 0) {
+        gamemode = false;
+        goToWindow(1);
     }
 
 
@@ -1223,7 +1331,6 @@ document.addEventListener('keydown', onKeyDown, false);
 document.addEventListener('keyup', onKeyUp, false);
 
 gameclient.addEventListener("click", function (e) {
-    // console.log("itscliecne")
     var actionConf = true;
     var mouseX = e.clientX;
     var mouseY = e.clientY;
@@ -1239,7 +1346,6 @@ gameclient.addEventListener("click", function (e) {
         if (consumes.allList[i].split("!")[0] == "s") {
             //scrolls
             if (minRangeX < scrollOffsetX && scrollOffsetX < maxRangeX && minRangeY < scrollOffsetY && scrollOffsetY < maxRangeY) {
-                // console.log("clicking on scrolls")
                 actionConf = false;
 
                 //pick up the consume if inventory not full
@@ -1266,22 +1372,24 @@ gameclient.addEventListener("click", function (e) {
         var ishere = accountinfo.place[i];
         if (pxmin <= mouseX && mouseX <= pxmax && pymin <= mouseY && mouseY <= pymax && i != lgusrIndex && accountinfo.place[i] != 0) {
             //playr is clicked
-            // console.log("clicking on player");
             actionConf = false;
             //change focused player
-            //send punches
             tgusr = accountinfo.name[i];
             tgusrIndex = i;
 
-            var att = randInt(1, accountinfo.attack[lgusrIndex]);
-            var flyRatioY = (accountinfo.positiony[tgusrIndex] - accountinfo.positiony[lgusrIndex]);
-            var flyRatioX = (accountinfo.positionx[tgusrIndex] - accountinfo.positionx[lgusrIndex]);
-            var yspd = flyRatioY / 20;
-            var xspd = flyRatioX / 20;
+            if (punchCoolDown == 0) {
+                //send punches
+                var att = randInt(1, accountinfo.attack[lgusrIndex]);
+                var flyRatioY = (accountinfo.positiony[tgusrIndex] - accountinfo.positiony[lgusrIndex]);
+                var flyRatioX = (accountinfo.positionx[tgusrIndex] - accountinfo.positionx[lgusrIndex]);
+                var yspd = flyRatioY / 20;
+                var xspd = flyRatioX / 20;
+                punchCoolDown = 100;
 
-            db.push({ type: "newTg", own: lgusrIndex, ask: tgusrIndex });
-            // save this for later
-            db.push({ type: "punch-shoot", who: lgusrIndex, target: tgusrIndex, xspd: xspd, yspd: yspd, att: att });
+                db.push({ type: "newTg", own: lgusrIndex, ask: tgusrIndex });
+                // save this for later
+                db.push({ type: "punch-shoot", who: lgusrIndex, target: tgusrIndex, xspd: xspd, yspd: yspd, att: att });
+            }
         }
     }
 
@@ -1297,8 +1405,6 @@ gameclient.addEventListener("click", function (e) {
     }
 
 });
-
-moveCoolDown = 500;
 
 // gameclient.addEventListener('onmousemove', function (e) {
 //     if (gamemode) {
@@ -1319,14 +1425,13 @@ var dmgTexts = {
 }
 
 function newDamageText(mode, who, amount) {
-    if(gamemode) {
-    //physical
-    dmgTexts.amount.push(amount);
-    dmgTexts.who.push(who);
-    dmgTexts.mode.push(mode);
-    dmgTexts.life.push(10);
-    dmgTexts.posy.push(0);
-    console.log(dmgTexts);
+    if (gamemode) {
+        //physical
+        dmgTexts.amount.push(amount);
+        dmgTexts.who.push(who);
+        dmgTexts.mode.push(mode);
+        dmgTexts.life.push(10);
+        dmgTexts.posy.push(0);
     }
 }
 
@@ -1359,6 +1464,18 @@ var bindVar = {
     life: []
 }
 
+//fatigue
+var fatigueVar = {
+    who: [],
+    target: [],
+    posx: [],
+    posy: [],
+    spdx: [],
+    spdy: [],
+    hit: [],
+    life: []
+}
+
 //physical variable
 var physicalVar = {
     who: [],
@@ -1378,12 +1495,10 @@ function csmTrg(ord) {
     // use the consume
     if (itemslot[ord].split("!")[0] == "s") {
         // scrolls used
-        // console.log("scroll use");
         if (itemslot[ord].split("!")[1] == "1") {
-            // console.log("ember use");
             //ember
+            // accounti
             if (tgusrIndex != -1) {
-                // console.log("make it fly");
                 //make ember fly
                 var att = randInt(5, 15);
                 var flyRatioY = (accountinfo.positiony[tgusrIndex] - accountinfo.positiony[lgusrIndex]);
@@ -1409,24 +1524,53 @@ function csmTrg(ord) {
                 itemslot = [];
             }
             updateSlots();
-        } else if( itemslot[ord].split("!")[1] == "0" ) {
+        } else if (itemslot[ord].split("!")[1] == "0") {
             //bind
             if (tgusrIndex != -1) {
-                // console.log("make it fly");
-                //make ember fly
-                var flyRatioY = (accountinfo.positiony[tgusrIndex] - accountinfo.positiony[lgusrIndex]);
-                var flyRatioX = (accountinfo.positionx[tgusrIndex] - accountinfo.positionx[lgusrIndex]);
-                var yspd = flyRatioY / 20;
-                var xspd = flyRatioX / 20;
+                var rangeX = Math.abs(accountinfo.positionx[lgusrIndex] - accountinfo.positionx[tgusrIndex]) <= 200;
+                var rangeY = Math.abs(accountinfo.positiony[lgusrIndex] - accountinfo.positiony[tgusrIndex]) <= 200;
+                if (rangeX && rangeY) {
+                    //make bind fly
+                    var flyRatioY = (accountinfo.positiony[tgusrIndex] - accountinfo.positiony[lgusrIndex]);
+                    var flyRatioX = (accountinfo.positionx[tgusrIndex] - accountinfo.positionx[lgusrIndex]);
+                    var yspd = flyRatioY / 40;
+                    var xspd = flyRatioX / 40;
 
-                db.push({ type: "bind-shoot", who: lgusrIndex, target: tgusrIndex, xspd: xspd, yspd: yspd });
-                // remove element from the slot
-                if (itemslot.length != 1) {
-                    itemslot.splice(ord, 1);
+                    db.push({ type: "bind-shoot", who: lgusrIndex, target: tgusrIndex, xspd: xspd, yspd: yspd });
+                    // remove element from the slot
+                    if (itemslot.length != 1) {
+                        itemslot.splice(ord, 1);
+                    } else {
+                        itemslot = [];
+                    }
+                    updateSlots();
                 } else {
-                    itemslot = [];
+                    newDamageText(4, lgusrIndex, "Target is too far away")
                 }
-                updateSlots();
+            }
+        } else if (itemslot[ord].split("!")[1] == "2") {
+            //bind
+            if (tgusrIndex != -1) {
+                var rangeX = Math.abs(accountinfo.positionx[lgusrIndex] - accountinfo.positionx[tgusrIndex]) <= 200;
+                var rangeY = Math.abs(accountinfo.positiony[lgusrIndex] - accountinfo.positiony[tgusrIndex]) <= 200;
+                if (rangeX && rangeY) {
+                    //make bind fly
+                    var flyRatioY = (accountinfo.positiony[tgusrIndex] - accountinfo.positiony[lgusrIndex]);
+                    var flyRatioX = (accountinfo.positionx[tgusrIndex] - accountinfo.positionx[lgusrIndex]);
+                    var yspd = flyRatioY / 40;
+                    var xspd = flyRatioX / 40;
+
+                    db.push({ type: "fatigue-shoot", who: lgusrIndex, target: tgusrIndex, xspd: xspd, yspd: yspd });
+                    // remove element from the slot
+                    if (itemslot.length != 1) {
+                        itemslot.splice(ord, 1);
+                    } else {
+                        itemslot = [];
+                    }
+                    updateSlots();
+                } else {
+                    newDamageText(4, lgusrIndex, "Target is too far away")
+                }
             }
         } else {
             // remove element from the slot
@@ -1460,7 +1604,7 @@ function updateSlots() {
 function talk() {
     var chatContent = document.getElementById("chatboxxx").value;
     document.getElementById("chatboxxx").value = "";
-    db.push({type:"chat", who:lgusrIndex, text:chatContent});
+    db.push({ type: "chat", who: lgusrIndex, text: chatContent });
 }
 
 // lobby tabs

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Lawless</title>
+    <title>Isla Online</title>
     <meta name="viewport" content="width=device-width, user-scalable=no">
     <meta charset="utf-8">
     <link rel="stylesheet" href="./assets/css/game-client.css">
@@ -13,10 +13,10 @@
     <div id="aber-game-parent-wrap">
         <div id="login-port">
             <div class="aber-logo-wrap">
-                
+
                 <h3 class="titleArea">
                     <img src="./assets/gamelogo.gif" class="logo">
-                    <span class="titleText">Lawless</span>
+                    <span class="titleText">Isla Online</span>
                     <img src="./assets/gamelogo.gif" class="logo">
                 </h3>
                 <span>バージョン：β0.1.2</span><br>
@@ -37,7 +37,7 @@
                 </div>
             </form><br>
             <div class="aber-center-ali aber-eight-center">
-                <span style="color: #fcf018">Chroはインド人です</span>
+                <span style="color: #fcf018">メンバーシップは月額何円にしよう、、。</span>
                 <img src="">
             </div>
         </div>
@@ -115,9 +115,15 @@
                     <img class="runIcon" src="./assets/system/running.png">
                 </div>
 
+                <!--punch cooldown-->
+                <div class="punchCoolDownWrap">
+                    <div id="punchCoolDownBar"></div>
+                    <img class="punchIcon" src="./assets/system/fist.png">
+                </div>
+
                 <!--chat box-->
-                <form action="javascript:talk()" >
-                <input type="text" id="chatboxxx" autocomplete="off" placeholder="What to say">
+                <form action="javascript:talk()">
+                    <input type="text" id="chatboxxx" autocomplete="off" placeholder="What to say">
                 </form>
             </div>
         </div>
