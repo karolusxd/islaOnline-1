@@ -24,7 +24,7 @@ canvas {
 }
 
 #lobby-port {
-    background: #262224;
+    background: #67812d;
     width: 100%;
     height: 337.5px;
     z-index: 20;
@@ -59,8 +59,6 @@ canvas {
     color: #fff;
     margin-top: 0px;
 }
-
-
 
 .form-input-label {
     color: #fff;
@@ -105,6 +103,7 @@ img {
     left: 150px;
     filter: brightness(1);
 }
+
 #lobby-clothes {
     position: absolute;
     top: 198px;
@@ -125,7 +124,7 @@ img {
 
 .lobby-bottom-tab {
     position: absolute;
-    top: 390px;
+    top: 440px;
     width: 377.5px;
     text-align: center;
 }
@@ -134,20 +133,31 @@ img {
     position: absolute;
     top: 545px;
     left: 0px;
-    background: #565556;
-    border-top: 6px solid #363736;
     height: 49px;
     width: 377.5px;
     text-align: center;
+
+
+    /* background: #565556;
+    border-top: 6px solid #363736; */
 }
 
 .lobby-bottom-btn {
-    font-size: 25px;
-    background: #f68d33;
+    font-size: 18px;
+    background: #958680;
     font-weight: bold;
     color: #fff;
-    padding: 6px 25px 6px 25px;
-    border: 3px solid #f9a65c;
+    padding: 8px 25px 8px 25px;
+    border: 3px outset #bbafaa;
+    min-width: 245px;
+}
+
+.lobby-bottom-btn:active {
+    border-style: inset;
+}
+
+.lobby-bottom-btn:disabled {
+    opacity: 0.7;
 }
 
 img {
@@ -423,5 +433,48 @@ input, button {
     padding: 5px;
     pointer-events: all;
     outline: none;
+    color: #fff;
+}
+.realmButton {
+        width: 100px;
+    height: 110px;
+    background: transparent;
+    background-image: url(../system/island.gif);
+    background-repeat: no-repeat;
+    background-size: 80% 80%;
+    border: none;
+    background-color: rgba(244,244,244,0);
+    background-position: center;
+    border-radius: 18px;
+}
+
+.realmButton:disabled {
+    background-color: rgba(244,244,244,0.2);
+}
+
+.realmInfo {
+    position: relative;
+    top: 40px;
+    color: #fff;
+    font-size: 15px;
+}
+
+.realm-wrap {
+    position: absolute;
+    /* background: #00ff00; */
+    top: 20px;
+    left: 35px;
+    width: 305px;
+}
+
+.menuSmallText {
+    font-weight: bold;
+    font-size: 18px;
+}
+.island-select-wrap {
+    margin-top:20px;
+}
+
+::placeholder {
     color: #fff;
 }

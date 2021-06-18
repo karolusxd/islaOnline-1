@@ -19,7 +19,7 @@
                     <span class="titleText">Isla Online</span>
                     <img src="./assets/gamelogo.gif" class="logo">
                 </h3>
-                <span>バージョン：β0.1.2</span><br>
+                <span>バージョン：Pre 0.0.5</span><br>
                 <!-- <h2 class="aber-sub-text">Tap Royale (beta)</h2> -->
             </div>
             <form class="aber-login-form" action="javascript:accreq(1)">
@@ -37,18 +37,28 @@
                 </div>
             </form><br>
             <div class="aber-center-ali aber-eight-center">
-                <span style="color: #fcf018">メンバーシップは月額何円にしよう、、。</span>
+                <!-- <span style="color: #fcf018">メンバーシップは月額何円にしよう、、。</span> -->
                 <img src="">
             </div>
         </div>
         <div id="lobby-port">
             <div id="hometabport">
                 <!--player status labels-->
-                <div class="rank-banner"></div>
+                <!-- <div class="rank-banner"></div>
                 <div class="banner-design-one"></div>
                 <div class="banner-design-two"></div>
                 <div class="banner-design-three"></div>
-                <div class="banner-design-four"></div>
+                <div class="banner-design-four"></div> -->
+
+                <!--show-realms-->
+                <div class="realm-wrap">
+                    <span class="menuSmallText">Select Island</span><br>
+                    <div class="island-select-wrap">
+                        <button onclick="slcIsl(0)" class="realmButton" disabled><span
+                                class="realmInfo">0/20</span></button>
+                        <button onclick="slcIsl(0)" class="realmButton"><span class="realmInfo">0/10</span></button>
+                    </div>
+                </div>
                 <div class="lobby-bottom-tab">
                     <div id="lobby-idle-btns">
                         <button class="lobby-bottom-btn" id="ready-trig-btn">PLAY</button>
@@ -97,7 +107,7 @@
         <div id="game-port">
             <canvas id="aberoyale-window"></canvas>
             <div id="game-dom-elements">
-                <button id="leave-arena-btn">leave arena (10s)</button>
+                <button id="leave-arena-btn">escape</button>
                 <div class="client-life-bar-wrap">
                     <div id="client-life-bar"></div>
                 </div>

@@ -13,6 +13,17 @@ var consumes = {
     pickup: []
 }
 
+// open new realm every 20-30 players
+// add and control mobs
+var realms = {
+    id: [],
+    mob: [],
+    mobType: [],
+    object: [],
+    objectType: [],
+    playerNumber: []
+}
+
 var moveCoolDown = 500;
 var punchCoolDown = 100;
 
@@ -90,22 +101,16 @@ function lobbyTabsS(mode) {
 }
 
 var leaveMode = false;
+var leavevalid = 0;
 document.getElementById("leave-arena-btn").onclick = function () {
     if (leaveMode == false) {
         leaveMode = true;
+        logoutCounter = 1000;
         document.getElementById("leave-arena-btn").innerHTML = "cancel";
     } else if (leaveMode == true) {
         leaveMode = false;
-        document.getElementById("leave-arena-btn").innerHTML = "leave arena (10s)";
+        document.getElementById("leave-arena-btn").innerHTML = "escape";
     }
-
-    setTimeout(function () {
-        if (accountinfo.place[lgusrIndex] == 1) {
-            db.push({ type: "return-lobby", name: lgusr });
-            document.getElementById("leave-arena-btn").innerHTML = "leave arena (10s)";
-            goToWindow(1);
-        }
-    }, 10000)
 }
 
 document.getElementById("ready-trig-btn").addEventListener("click", async () => {
@@ -120,6 +125,7 @@ var cancelMode = false;
 document.getElementById("cancel-trig-btn").addEventListener("click", async () => {
     cancelMode = true;
     document.getElementById("cancel-trig-btn").innerHTML = "Cancelling...";
+    document.getElementById("cancel-trig-btn").disabled = true;
 })
 
 // game global variables
@@ -157,10 +163,6 @@ window.onload = function () {
     // lgusr = "a!v";
     // lgusrIndex = 0;
     // startGame();
-}
-
-function generateTerrain(x, y, sizex, sizey) {
-
 }
 
 function accreq(mode) {
@@ -245,11 +247,16 @@ var tgusrIndex = -1;
 
 var opusr;
 
+var logoutCounter = 1000;
+
 function login(usrname) {
     lgusr = usrname;
     lgusrIndex = accountinfo.name.indexOf(lgusr);
 
-    //set lobby skin, set global skin variable
+    // make new realm if there arent any
+    if (realms.id.length == 0) {
+        db.push({ type: "new-realm" });
+    }
 
     //switch screen based on character place
     if (accountinfo.place[lgusrIndex] == 0) {
@@ -319,6 +326,7 @@ var startListening = function () {
                         cancelMode = false;
                         db.push({ type: "return-lobby", name: lgusr });
                         document.getElementById("cancel-trig-btn").innerHTML = "Cancel";
+                        document.getElementById("cancel-trig-btn").disabled = false;
                         goToWindow(1);
                     }
                 }, 2000)
@@ -495,6 +503,13 @@ var startListening = function () {
             if (gamemode) {
                 newDamageText(4, snap.who, snap.text);
             }
+        } else if (snap.type == "new-realm") {
+            realms.id.push(1); // 1 open, 0 closed
+            realms.mob.push(new Array);
+            realms.mobType.push(new Array);
+            realms.object.push(new Array);
+            realms.objectType.push(new Array);
+            realms.playerNumber.push(0);
         }
     });
 }
@@ -528,7 +543,7 @@ function startGame() {
 var gamemode = false;
 var testmode = false;
 var camera = [0, -50];
-var floorDimension = [1200, 1200];
+var floorDimension = [1500, 1500];
 
 var health = 300;
 //image holders
@@ -637,15 +652,17 @@ var plHeadFemale = new Image("./assets/plHeadFemale.png");
 //animation variable
 var animationFrame = 0;
 
+var scale = 1.8;
+
 function animate() {
     var canvas = document.getElementById("aberoyale-window");
-    canvas.width = 377.5;
-    canvas.height = 600;
+    canvas.width = (377.5) * scale;
+    canvas.height = (600) * scale;
     var ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, 500, 500);
 
-    ctx.fillStyle = "#67802d";
-    ctx.fillRect(0, 0, 1000, 1000);
+    // ctx.fillStyle = "#67802d";
+    // ctx.fillRect(0, 0, 1000, 1000);
 
     // check and show vitals
     //life bar
@@ -657,9 +674,24 @@ function animate() {
         gamemode = false;
     }
 
-    ///draw floor
+    //draw outer wilderness
+    ctx.fillStyle = "#715b00";
+    var wildernessSize = [floorDimension[0] + 2000, floorDimension[1] + 2000];
+    for (i = 0; i < 5; i++) {
+        ctx.globalAlpha = 0.2 * (i + 1);
+        ctx.fillRect((-1 * camera[0]) + (10 * i) - 1000, (-1 * camera[1]) + 10 + (10 * i) - 1000, wildernessSize[0] + (100 - (20 * i)), wildernessSize[1] + (100 - (20 * i)));
+    }
+    ctx.globalAlpha = 1;
+
+    ///draw glassy area
     ctx.fillStyle = "#67802d";
-    ctx.fillRect(50 - camera[0], 20 - camera[1], floorDimension[0], floorDimension[1]);
+    for (i = 3; i < 5; i++) {
+        ctx.globalAlpha = 0.2 * (i + 1);
+        ctx.fillRect((-1 * camera[0]) + (10 * i), (-1 * camera[1]) + 10 + (10 * i), floorDimension[0] + (100 - (20 * i)), floorDimension[1] + (100 - (20 * i)));
+    }
+    ctx.globalAlpha = 1;
+    // ctx.fillRect(50 - camera[0], 20 - camera[1], floorDimension[0], floorDimension[1]);
+    // ctx.fillRect(50 - camera[0], 20 - camera[1], floorDimension[0], floorDimension[1]);
 
     //render safe zone
     ctx.drawImage(safeZoneIMG, (floorDimension[0] / 2) - (camera[0] + 250), (floorDimension[1] / 2) - (camera[1] + 150), 500, 300);
@@ -821,14 +853,14 @@ function animate() {
 
     // move the camera automatically, depending on character position
     if (testmode == false) {
-        var howfarraw = accountinfo.positionx[lgusrIndex] - (camera[0] + 120);
-        if (accountinfo.positionx[lgusrIndex] < (camera[0] + 120)) {
+        var howfarraw = accountinfo.positionx[lgusrIndex] - (camera[0] + (130 * scale));
+        if (accountinfo.positionx[lgusrIndex] < (camera[0] + (130 * scale))) {
             if (Math.abs(howfarraw) >= 10) {
                 camera[0] -= 10;
             } else {
                 camera[0] -= Math.abs(howfarraw);
             }
-        } else if (accountinfo.positionx[lgusrIndex] > (camera[0] + 120)) {
+        } else if (accountinfo.positionx[lgusrIndex] > (camera[0] + (130 * scale))) {
             if (Math.abs(howfarraw) >= 10) {
                 camera[0] += 10;
             } else {
@@ -839,14 +871,14 @@ function animate() {
 
     //auto camera
     if (testmode == false) {
-        howfarraw = accountinfo.positiony[lgusrIndex] - (camera[1] + 250);
-        if (accountinfo.positiony[lgusrIndex] < (camera[1] + 250)) {
+        howfarraw = accountinfo.positiony[lgusrIndex] - (camera[1] + (250 * scale));
+        if (accountinfo.positiony[lgusrIndex] < (camera[1] + (250 * scale))) {
             if (Math.abs(howfarraw) >= 10) {
                 camera[1] -= 10;
             } else {
                 camera[1] -= Math.abs(howfarraw);
             }
-        } else if (accountinfo.positiony[lgusrIndex] > (camera[1] + 250)) {
+        } else if (accountinfo.positiony[lgusrIndex] > (camera[1] + (250 * scale))) {
             if (Math.abs(howfarraw) >= 10) {
                 camera[1] += 10;
             } else {
@@ -1266,6 +1298,28 @@ function animate() {
         goToWindow(1);
     }
 
+    // if player (you) leaving, show message on head
+    if (leaveMode == true) {
+        if (logoutCounter != 0) {
+            if (logoutCounter % 100 == 0) {
+                // show logout text
+                db.push({ type: "chat", who: lgusrIndex, text: "Leaving - " + (logoutCounter / 100) });
+                logoutCounter -= 1;
+            } else {
+                logoutCounter -= 1;
+            }
+        } else {
+            if (accountinfo.place[lgusrIndex] == 1) {
+                db.push({ type: "return-lobby", name: lgusr });
+                document.getElementById("leave-arena-btn").innerHTML = "escape";
+                goToWindow(1);
+                leaveMode == false;
+                logoutCounter = 1000;
+            }
+        }
+
+    }
+
 
 
     setTimeout(function () {
@@ -1332,8 +1386,10 @@ document.addEventListener('keyup', onKeyUp, false);
 
 gameclient.addEventListener("click", function (e) {
     var actionConf = true;
-    var mouseX = e.clientX;
-    var mouseY = e.clientY;
+    var mouseX = e.clientX * scale;
+    var mouseY = e.clientY * scale;
+    leaveMode = false;
+    document.getElementById("leave-arena-btn").innerHTML = "escape";
     // check if click axis has consumes
     for (i = 0; i < consumes.allList.length; i++) {
         var minRangeX = consumes.positionx[i] - 10;
@@ -1395,11 +1451,12 @@ gameclient.addEventListener("click", function (e) {
 
     // if nothing is at click destination, move
     if (actionConf) {
-        if (gamemode && e.clientX >= 0 && e.clientY >= 0 && (e.clientX + camera[0] - 70) <= (floorDimension[0] - 30) && (e.clientY + camera[1] - 100) <= (floorDimension[1] - 100)) {
+        var areaBool = mouseX >= 0 && mouseY >= 0 && (mouseX + camera[0] - 70) <= (floorDimension[0] - 30) && (mouseY + camera[1] - 100) <= (floorDimension[1] - 100);
+        if (gamemode) {
             // if cooldown is over move
             if (moveCoolDown == 0 && bindInterval == 0) {
                 moveCoolDown = 500;
-                db.push({ type: "player-new-position", name: lgusr, positionx: e.clientX + camera[0] - 70, positiony: e.clientY + camera[1] - 100 });
+                db.push({ type: "player-new-position", name: lgusr, positionx: mouseX + camera[0] - 70, positiony: mouseY + camera[1] - 100 });
             }
         }
     }
